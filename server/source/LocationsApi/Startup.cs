@@ -8,6 +8,10 @@ using LocationsApi.Infrastructure.Extension;
 using LocationsApi.Service;
 using Serilog;
 using System.IO;
+using LocationsApi.Service.Helpers;
+using LocationsApi.Persistence;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace LocationsApi
 {
@@ -35,17 +39,16 @@ namespace LocationsApi
 
             services.AddAddScopedServices();
 
-            services.AddTransientServices();
-
             services.AddSwaggerOpenAPI();
             
             services.AddMediatorCQRS();
 
-            services.AddVersion();
+            services.AddSingleton(Configuration);
 
+            services.AddVersion();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory log)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory log, IServiceProvider service)
         {
             if (env.IsDevelopment())
             {
@@ -62,10 +65,21 @@ namespace LocationsApi
 
             log.AddSerilog();
 
+            RunMigrations(service);
+
+            ApiHelper.IntializeApiClient();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void RunMigrations(IServiceProvider service)
+        {
+            // This returns the context.
+            using var context = service.GetService<ApplicationDbContext>();
+            context.Database.Migrate();
         }
     }
 }

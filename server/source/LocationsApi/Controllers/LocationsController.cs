@@ -28,10 +28,11 @@ namespace LocationsApi.Controllers
             return Ok(await Mediator.Send(new GetAllLocationsQuery()));
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int locationId)
+        [HttpGet("{query}")]        
+        public async Task<IActionResult> SearchForPlace(string query)
         {
-            return Ok(await Mediator.Send(new GetLocationByIdQuery { LocationId = locationId }));
-        }        
+            return Ok(await Mediator.Send(new GetAllLocationsQuery { Query = query }));
+        }
+
     }
 }

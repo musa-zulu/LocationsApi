@@ -1,31 +1,38 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 using LocationsApi.Domain.Entities;
-using LocationsApi.Persistence;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using LocationsApi.Service.Contract;
 
 namespace LocationsApi.Service.Features.LocationFeatures.Queries
 {
     public class GetAllLocationsQuery : IRequest<IEnumerable<Location>>
     {
-
+        public string Query { get; set; }
         public class GetAllLocationsQueryHandler : IRequestHandler<GetAllLocationsQuery, IEnumerable<Location>>
-        {
-            private readonly IApplicationDbContext _context;
-            public GetAllLocationsQueryHandler(IApplicationDbContext context)
+        {           
+            private readonly IFoursquareService _fourSqureService;            
+            public GetAllLocationsQueryHandler(IFoursquareService foursquareService)
             {
-                _context = context;
+                _fourSqureService = foursquareService;
             }
+
             public async Task<IEnumerable<Location>> Handle(GetAllLocationsQuery request, CancellationToken cancellationToken)
             {
-                var locations = await _context.Locations.ToListAsync();
+                PopulateDbWithLocationsFromFourSqaure(request.Query);
+                var locations = await _fourSqureService.GetLocations();              
                 if (locations == null)
                 {
                     return null;
                 }
                 return locations.AsReadOnly();
+            }
+
+            private void PopulateDbWithLocationsFromFourSqaure(string query)
+            {
+                //call fourSqure  service to populate the db
+                _fourSqureService.StoreLocationsAsync(query);
             }
         }
     }

@@ -6,7 +6,8 @@ namespace LocationsApi.Persistence
 {
     public interface IApplicationDbContext
     {
-        DbSet<Location> Locations { get; set; }
+        DbSet<Location> Locations { get; set; }        
+        DbSet<Category> Categories { get; set; }
 
         Task<int> SaveChangesAsync();
     }

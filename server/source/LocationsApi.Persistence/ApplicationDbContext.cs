@@ -1,35 +1,30 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using LocationsApi.Domain.Entities;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace LocationsApi.Persistence
 {
-    public class ApplicationDbContext : DbContext, IApplicationDbContext
+    public sealed class ApplicationDbContext : DbContext, IApplicationDbContext
     {
-        // This constructor is used of runit testing
         public ApplicationDbContext()
         {
-
         }
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
-        public DbSet<Location> Locations { get; set; }
+        public DbSet<Location> Locations { get; set; }        
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {         
+        {
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder
-                .UseSqlServer("DataSource=app.db");
-            }
-
+            base.OnConfiguring(optionsBuilder);
         }
 
         public async Task<int> SaveChangesAsync()

@@ -8,6 +8,10 @@ using LocationsApi.Persistence;
 using System;
 using System.IO;
 using System.Reflection;
+using LocationsApi.Service.Services;
+using LocationsApi.Service.Contract;
+using LocationsApi.Service.Helpers;
+using System.Configuration;
 
 namespace LocationsApi.Infrastructure.Extension
 {
@@ -33,11 +37,13 @@ namespace LocationsApi.Infrastructure.Extension
 
         public static void AddAddScopedServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddScoped<IApplicationDbContext>(provider => provider.GetService<ApplicationDbContext>());
+            serviceCollection.AddScoped <IApplicationDbContext,ApplicationDbContext>();
+            serviceCollection.AddScoped<IFoursquareService, FoursquareService>();
         }
 
-        public static void AddTransientServices(this IServiceCollection serviceCollection)
-        {           
+        public static void AddSingleton(this IServiceCollection serviceCollection, IConfiguration configuration)
+        {
+            serviceCollection.AddSingleton(configuration.GetSection("ApiConfiguration").Get<ApiConfiguration>());
         }
 
         public static void AddSwaggerOpenAPI(this IServiceCollection serviceCollection)
@@ -54,7 +60,7 @@ namespace LocationsApi.Infrastructure.Extension
                         Contact = new Microsoft.OpenApi.Models.OpenApiContact()
                         {
                             Email = "zuluchs@gmail.com",
-                            Name = "Musa Zulu"                    
+                            Name = "Musa Zulu"
                         },
                         License = new Microsoft.OpenApi.Models.OpenApiLicense()
                         {
@@ -69,7 +75,7 @@ namespace LocationsApi.Infrastructure.Extension
             });
 
         }
-        
+
         public static void AddController(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddControllers().AddNewtonsoftJson();
